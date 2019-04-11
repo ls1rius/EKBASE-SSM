@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lh.ekbase.mapper.ArticleMapper">
+
+    <!--<cache eviction="LRU" type="com.lh.ekbase.config.LoggingRedisCache"/>-->
+
+    <update id="setArticleCoverUrl">
+        UPDATE articles SET cover_url = #{url} WHERE id = #{id}
+    </update>
+    <select id="getArticle" resultType="com.lh.ekbase.entity.Article">
+        SELECT * FROM articles WHERE id = #{id}
+    </select>
+    <select id="getSearchArticlesCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM (articles as A
+        INNER JOIN users as U
+        ON U.id = A.owner_id
+        )
+        WHERE
+        A.title LIKE concat('%',#{str},'%')
+        OR A.content like concat('%',#{str},'%')
+        AND status = 1;
+    </select>
+    <select id="searchArticles" resultType="com.lh.ekbase.entity.Article">
+        SELECT A.*,U.`name` AS owner_name,U.`head_image`,U.username AS owner_username,U.head_image AS owner_head_image
+        FROM (articles as A
+            INNER JOIN users as U
+            ON U.id = A.owner_id
+        )
+        WHERE
+        (
+        A.title LIKE concat('%',#{str},'%')
+        OR A.content like concat('%',#{str},'%')
+        )
+        AND status = 1
+        LIMIT #{start},#{cnt};
+    </select>
+    <select id="getRcmdArticle" resultType="com.lh.ekbase.entity.Article">
+        SELECT * FROM articles
+        LEFT JOIN users ON owner_id = users.id
+        WHERE articles.id = 387 OR articles.id = 389
+    </select>
+    <select id="getCarousel" resultType="com.lh.ekbase.entity.Article">
+        SELECT * FROM articles ORDER BY hit_cnt LIMIT 0, #{cnt}
+    </select>
+    <select id="getAllArticleContents" resultType="java.lang.String">
+        SELECT content FROM articles;
+    </select>
+    <select id="getTheReviewArticles" resultType="Article">
+        SELECT A.*,U.`name` AS owner_name,U.`head_image`,U.username AS owner_username,U.head_image AS owner_head_image
+        FROM (articles as A
+            INNER JOIN users as U
+            ON U.id = A.owner_id
+        )
+        WHERE status != 1
+        LIMIT #{start},#{cnt};
+    </select>
+    <select id="getTheSpecificArticles" resultType="Article">
+        SELECT A.*,U.`name` AS owner_name,U.`head_image`,U.username AS owner_username,U.head_image AS owner_head_image
+        FROM (articles as A
+        INNER JOIN users as U
+        ON U.id = A.owner_id
+        )
+        WHERE status = #{status}
+        LIMIT #{start},#{cnt};
+    </select>
+
+    <update id="updateArticleStatus">
+        UPDATE articles
+        SET status = #{status}
+        WHERE id = #{id};
+    </update>
+
+
+    <select id="getMySpecificArticles" resultType="Article">
+        SELECT A.*,U.`name` AS owner_name,U.`head_image`,U.username AS owner_username,U.head_image AS owner_head_image
+        FROM (articles as A
+        INNER JOIN users as U
+        ON U.id = A.owner_id
+        )
+        WHERE status = #{status}
+        AND U.username = #{username}
+        LIMIT #{start},#{cnt};
+    </select>
+
+    <insert id="uploadArticle">
+        INSERT INTO articles(title,content,owner_id,cover_url,date)
+        VALUES (#{title},#{content},#{ownerId},#{coverUrl},#{date})
+    </insert>
+
+</mapper>

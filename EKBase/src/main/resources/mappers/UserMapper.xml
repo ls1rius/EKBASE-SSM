@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lh.ekbase.mapper.UserMapper">
+
+    <!--<cache eviction="LRU" type="com.lh.ekbase.config.LoggingRedisCache"/>-->
+
+    <resultMap id="UserResultMap" type="com.lh.ekbase.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username" />
+        <result column="name" property="name" />
+        <result column="email" property="email" />
+        <result column="phone" property="phone" />
+        <result column="type" property="type" />
+    </resultMap>
+    <select id="checkUserInfo" resultType="com.lh.ekbase.entity.User">
+        SELECT * FROM users WHERE username = #{username} AND password = #{password}
+    </select>
+    <select id="checkUserName" resultType="com.lh.ekbase.entity.User">
+        SELECT * FROM users WHERE username = #{username}
+    </select>
+    <select id="getUserInfo" resultType="com.lh.ekbase.entity.User">
+        SELECT id, username, `name`, email, type FROM users WHERE id = #{userId}
+    </select>
+    <select id="getFavoriteTags" resultType="com.lh.ekbase.entity.Tag">
+        SELECT tags.id, tags.name
+        FROM user_favorite_tags
+        LEFT JOIN tags ON user_favorite_tags.tag_id = tags.id
+        WHERE user_id = #{userId}
+    </select>
+    <select id="getFollowings" resultType="com.lh.ekbase.entity.User">
+        SELECT users.*
+        FROM user_followings
+        LEFT JOIN users ON user_followings.following_user_id = users.id
+        WHERE user_id = #{userId}
+    </select>
+    <select id="getFollowers" resultType="com.lh.ekbase.entity.User">
+        SELECT users.*
+        FROM user_followings
+            LEFT JOIN users ON user_followings.user_id = users.id
+        WHERE following_user_id = #{userId}
+    </select>
+    <insert id="register">
+        insert into users (username,password,`name`,email,phone)
+        values (#{username},#{password},#{name},#{email},#{phone})
+    </insert>
+    <update id="updateSex">
+        UPDATE users SET sex = #{sex} WHERE username = #{username}
+    </update>
+    <update id="updateAge">
+        UPDATE users SET age = #{age} WHERE username = #{username}
+    </update>
+    <update id="updateName">
+        UPDATE users SET name = #{name} WHERE username = #{username}
+    </update>
+    <update id="updateEmail">
+        UPDATE users SET email = #{email} WHERE username = #{username}
+    </update>
+    <update id="updatePhone">
+        UPDATE users SET phone = #{phone} WHERE username = #{username}
+    </update>
+    <update id="updateHeadImage">
+        UPDATE users SET head_image = #{headImage} WHERE username = #{username}
+    </update>
+</mapper>
